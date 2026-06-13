@@ -108,8 +108,21 @@ else{
   for(i=1;i<argc;i++){
     if(strcmp1(argv[i],"-i")==0) {
     strcpy(jobnamec,argv[i+1]);strcpy1(jobnamef,argv[i+1],132);jin++;break;}
-    if(strcmp1(argv[i],"-v")==0) {
-	printf("\nThis is Version 2020\n\n");
+    if(strcmp1(argv[i],"-v")==0 || strcmp1(argv[i],"--version")==0) {
+	printf("\nAESimFM v2.0\n\n");
+	FORTRAN(stop,());
+    }
+    if(strcmp1(argv[i],"-h")==0 || strcmp1(argv[i],"--help")==0) {
+	printf("\nAESimFM v2.0 -- Windows-native forging simulation solver\n");
+	printf("Usage:\n");
+	printf("  solver -i <jobname>        Run simulation from <jobname>.inp\n");
+	printf("  solver -i <jobname> -o <dir>  Output results to <dir>\n");
+	printf("  solver -v | --version      Show version\n");
+	printf("  solver -h | --help         Show this help\n");
+	printf("\nEnvironment:\n");
+	printf("  OMP_NUM_THREADS=N           Set number of OpenMP threads (default: 4)\n");
+	printf("  CCX_NPROC_EQUATION_SOLVER=N Set SPOOLES solver threads\n");
+	printf("\n");
 	FORTRAN(stop,());
     }
   }
