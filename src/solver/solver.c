@@ -19,6 +19,25 @@
 #include <string.h>
 #include "solver.h"
 #include <time.h>
+#include <signal.h>
+#include <windows.h>
+
+static char _sig_jobnamec[660] = "";
+static void sig_handler(int sig) {
+  if (_sig_jobnamec[0]) {
+    char fneig[692];
+    strcpy(fneig, _sig_jobnamec);
+    strcat(fneig, ".frd");
+    FILE *fh = fopen(fneig, "ab");
+    if (fh) {
+      fprintf(fh, " 9999\n");
+      fclose(fh);
+    }
+  }
+  fprintf(stderr, "\nSolver crash: signal %d (FRD footer written)\n", sig);
+  fflush(stderr);
+  _exit(1);
+}
 
 #ifdef WeICME_MPI
 ITG myid = 0, nproc = 0;
@@ -110,7 +129,7 @@ else{
     strcpy(jobnamec,argv[i+1]);strcpy1(jobnamef,argv[i+1],132);jin++;break;}
     if(strcmp1(argv[i],"-v")==0 || strcmp1(argv[i],"--version")==0) {
 	printf("\nAESimFM v2.0\n\n");
-	FORTRAN(stop,());
+	exit(0);
     }
     if(strcmp1(argv[i],"-h")==0 || strcmp1(argv[i],"--help")==0) {
 	printf("\nAESimFM v2.0 -- Windows-native forging simulation solver\n");
@@ -119,11 +138,23 @@ else{
 	printf("  solver -i <jobname> -o <dir>  Output results to <dir>\n");
 	printf("  solver -v | --version      Show version\n");
 	printf("  solver -h | --help         Show this help\n");
+	printf("  solver --threads N         Set max OpenMP threads (default: logical cores)\n");
 	printf("\nEnvironment:\n");
-	printf("  OMP_NUM_THREADS=N           Set number of OpenMP threads (default: 4)\n");
+	printf("  OMP_NUM_THREADS=N           Set number of OpenMP threads (default: logical cores)\n");
 	printf("  CCX_NPROC_EQUATION_SOLVER=N Set SPOOLES solver threads\n");
 	printf("\n");
-	FORTRAN(stop,());
+	exit(0);
+    }
+    if(strcmp1(argv[i],"--threads")==0) {
+      if(i+1<argc) {
+          int nt=atoi(argv[i+1]);
+          if(nt>0) {
+              char buf[32];
+              sprintf(buf,"%d",nt);
+              setenv("OMP_NUM_THREADS",buf,1);
+          }
+      }
+      i++;
     }
   }
   if(jin==0){strcpy(jobnamec,argv[1]);strcpy1(jobnamef,argv[1],132);}
@@ -134,7 +165,16 @@ else{
   }
 }
 setenv("CCX_JOBNAME_GETJOBNAME",jobnamec,1);
-if(!getenv("CCX_NPROC_EQUATION_SOLVER") && !getenv("OMP_NUM_THREADS")) setenv("OMP_NUM_THREADS","4",1);
+strcpy(_sig_jobnamec, jobnamec);
+if(!getenv("CCX_NPROC_EQUATION_SOLVER") && !getenv("OMP_NUM_THREADS")) {
+    SYSTEM_INFO si;
+    GetSystemInfo(&si);
+    int ncpu = (int)si.dwNumberOfProcessors;
+    if(ncpu<1) ncpu=1;
+    char buf[32];
+    sprintf(buf,"%d",ncpu);
+    setenv("OMP_NUM_THREADS",buf,1);
+  }
 
 #ifdef BAM
 ITG lop=0,lrestart=0,kstep=1,kinc=1;
@@ -149,6 +189,9 @@ printf("AESim_FM solver\n");
 printf("************************************************************\n\n");
 printf("You are using an executable made on Fri Jun 12 02:53:37 EDT 2026\n");
 fflush(stdout);
+
+signal(SIGSEGV, sig_handler);
+signal(SIGFPE, sig_handler);
 
 istep=0;
 istat=0;

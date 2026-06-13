@@ -28,7 +28,9 @@ $requiredDlls = @(
     "libgfortran-5.dll",
     "libgomp-1.dll",
     "libwinpthread-1.dll",
-    "libgcc_s_seh-1.dll"
+    "libgcc_s_seh-1.dll",
+    "libquadmath-0.dll",
+    "libatomic-1.dll"
 )
 
 Write-Host "=== AESimFM v2.0 Solver Packaging ==="
