@@ -1,0 +1,39 @@
+# Build output
+build/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# HDF5 output
+*.h5
+*.frd
+
+# Package
+package/
+
+# Test outputs
+test/outputs/
+test_run/
+
+# Temp
+*.tmp
+*.log
+*.swp
+*~
+
+# MSYS2
+.msys2/

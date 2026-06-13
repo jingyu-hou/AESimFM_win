@@ -1,0 +1,116 @@
+!     
+!     WeICME (Wedge Integrated Computational Materials Engineering)
+!                 - A 3-dimensional finite element program.
+!     
+!     Developed and maintained by Shenzhen Wedge Central 
+!     South Research Institute co., Ltd., Shenzhen, China
+!     
+!     Copy Right 2019-2023.
+!
+      subroutine dynamicrecrystallizations(inpc,textpart,gscon,
+     &  nmat,ncmat_,iperturb,irstrt,istep,istat,n,
+     &  iline,ipol,inl,ipoinp,inp,ipoinpc,ier,nstate_)
+!
+!     reading the input deck: *DYNAMIC RECRYSTALLIZATION
+!
+      implicit none
+!
+      character*1 inpc(*)
+      character*132 textpart(26)
+!
+      integer nmat,istep,istat,n,key,i,ncmat_,nconstants,imax,isum,j,
+     &   iperturb(*),ier,irstrt(*),iline,ipol,inl,ipoinp(2,*),inp(3,*),
+     &   ipoinpc(0:*),nstate_
+!
+      real*8 gscon(30,5,*)
+!
+      iperturb(1)=3
+      iperturb(2)=1
+      nconstants=30
+!
+      write(*,*) '*INFO reading *DYNAMIC RECRYSTALLIZATION: nonlinear'
+      write(*,*) '      geometric effects are turned on'
+      write(*,*)
+!
+      if((istep.gt.0).and.(irstrt(1).ge.0)) then
+         write(*,*) '*ERROR reading *DYNAMIC RECRYSTALLIZATION:'
+         write(*,*) '       *DYNAMIC RECRYSTALLIZATION'
+         write(*,*) '  should be placed before all step definitions'
+         ier=1
+         return
+      endif
+!
+      if(nmat.eq.0) then
+         write(*,*) '*ERROR reading *DYNAMIC RECRYSTALLIZATION:'
+         write(*,*) '       *DYNAMIC RECRYSTALLIZATION'
+         write(*,*) '  should bepreceded by a *MATERIAL card'
+         ier=1
+         return
+      endif
+!
+      do i=2,n
+         write(*,*) 
+     &        '*WARNING reading *DYNAMIC RECRYSTALLIZATION:'
+         write(*,*) '         parameter not recognized:'
+         write(*,*) '         ',
+     &        textpart(i)(1:index(textpart(i),' ')-1)
+         call inputwarning(inpc,ipoinpc,iline,
+     &"DYNAMIC RECRYSTALLIZATION%")
+      enddo
+!
+      nstate_=max(nstate_,15)
+!
+      do j=1,3
+         call getnewline(inpc,textpart,istat,n,key,iline,ipol,
+     &        inl,ipoinp,inp,ipoinpc)
+         if((istat.lt.0).or.(key.eq.1)) exit
+         imax=8
+         do i=1,imax
+            read(textpart(i)(1:20),'(f20.0)',iostat=istat)
+     &         gscon(i+(j-1)*8,1,nmat)
+            if(istat.gt.0) then
+               call inputerror(inpc,ipoinpc,iline,
+     &              "*DYNAMIC RECRYSTALLIZATION%",ier)
+               return
+            endif
+         enddo
+!
+      enddo
+!
+!     Optional column 2: SRX/MRX parameters
+!     Backward compatible: if no extra lines follow, exits on keyword/EOF
+!
+      do j=1,(nconstants)/8+1
+         call getnewline(inpc,textpart,istat,n,key,iline,ipol,
+     &        inl,ipoinp,inp,ipoinpc)
+         if((istat.lt.0).or.(key.eq.1)) then
+            if (j .eq. 1) return
+            exit
+         endif
+         imax=8
+         if(8*j.gt.nconstants) then
+            imax=nconstants-8*(j-1)
+         endif
+         do i=1,imax
+            read(textpart(i)(1:20),'(f20.0)',iostat=istat)
+     &         gscon(i+(j-1)*8,2,nmat)
+            if(istat.gt.0) then
+               call inputerror(inpc,ipoinpc,iline,
+     &              "*DYNAMIC RECRYSTALLIZATION%",ier)
+               return
+            endif
+         enddo
+      enddo
+!
+!     If column 2 is used, reserve enough state variables for SRX/MRX
+!
+      isum = 0
+      do i = 1, nconstants
+         isum = isum + int(abs(gscon(i,2,nmat)))
+      enddo
+      if (isum .gt. 0) then
+         nstate_ = max(nstate_, 43)
+      endif
+!
+      return
+      end
