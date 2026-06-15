@@ -3,8 +3,8 @@ param(
     [switch]$SolverOnly,
     [switch]$Debug,
     [string]$BuildDir = "build",
-    [switch]$UseSPOOLES,
-    [switch]$NoHDF5,
+    [switch]$UseMUMPS,
+    [switch]$UseHDF5,
     [switch]$Help
 )
 
@@ -19,15 +19,15 @@ Options:
   -SolverOnly    Build solver only (no remesh tests)
   -Debug         Debug build (default: Release)
   -BuildDir DIR  Build directory name (default: build)
-  -UseSPOOLES    Use SPOOLES instead of MUMPS
-  -NoHDF5        Disable HDF5 output (FRD only)
-  -Help           Show this help
+  -UseMUMPS      Enable MUMPS sparse solver (default: SPOOLES)
+  -UseHDF5       Enable HDF5 output (default: FRD only)
+  -Help          Show this help
 
 Examples:
-  .\build.ps1                        # Default build (MUMPS + HDF5)
+  .\build.ps1                        # Default build (SPOOLES + FRD)
   .\build.ps1 -Clean                 # Clean rebuild
-  .\build.ps1 -UseSPOOLES -NoHDF5    # Legacy-compatible build
   .\build.ps1 -Debug                 # Debug build
+  .\build.ps1 -UseMUMPS -UseHDF5     # MUMPS + HDF5 build
 "@
     return
 }
@@ -40,8 +40,8 @@ Write-Host "========================================"
 Write-Host " AESimFM v2.0 Build"
 Write-Host "========================================"
 Write-Host " Build Type : $BUILD_TYPE"
-Write-Host " MUMPS      : $(if ($UseSPOOLES) { 'OFF (SPOOLES)' } else { 'ON' })"
-Write-Host " HDF5       : $(if ($NoHDF5) { 'OFF (FRD only)' } else { 'ON' })"
+Write-Host " MUMPS      : $(if ($UseMUMPS) { 'ON' } else { 'OFF (SPOOLES)' })"
+Write-Host " HDF5       : $(if ($UseHDF5) { 'ON' } else { 'OFF (FRD only)' })"
 Write-Host "========================================"
 Write-Host ""
 
@@ -72,13 +72,11 @@ $cmakeArgs = @(
     "-G", "MSYS Makefiles",
     "-DCMAKE_BUILD_TYPE=$BUILD_TYPE"
 )
-if ($UseSPOOLES) {
-    $cmakeArgs += "-DUSE_MUMPS=OFF"
-    $cmakeArgs += "-DUSE_SPOOLES=ON"
+if ($UseMUMPS) {
+    $cmakeArgs += "-DUSE_MUMPS=ON"
 }
-if ($NoHDF5) {
-    $cmakeArgs += "-DOUTPUT_HDF5=OFF"
-    $cmakeArgs += "-DOUTPUT_FRD=ON"
+if ($UseHDF5) {
+    $cmakeArgs += "-DOUTPUT_HDF5=ON"
 }
 
 $cmakeArgsStr = $cmakeArgs -join " "

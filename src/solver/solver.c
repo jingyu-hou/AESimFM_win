@@ -1,4 +1,4 @@
-/*                                                                              */
+﻿/*                                                                              */
 /*      WeICME (Wedge Integrated Computational Materials Engineering)           */
 /*                 - A 3-dimensional finite element program.                    */   
 /*     Developed and maintained by Shenzhen Wedge Central                       */
@@ -124,9 +124,13 @@ MPI_Comm_size(MPI_COMM_WORLD, &nproc) ;
 
 if(argc==1){printf("Usage: solver -i jobname\n");FORTRAN(stop,());}
 else{
+  ITG n_logical_cpu=1;
+  {SYSTEM_INFO si;GetSystemInfo(&si);n_logical_cpu=(ITG)si.dwNumberOfProcessors;if(n_logical_cpu<1)n_logical_cpu=1;}
+
   for(i=1;i<argc;i++){
     if(strcmp1(argv[i],"-i")==0) {
-    strcpy(jobnamec,argv[i+1]);strcpy1(jobnamef,argv[i+1],132);jin++;break;}
+      if(i+1>=argc){printf("ERROR: -i requires a jobname\n");exit(1);}
+    strcpy(jobnamec,argv[i+1]);strcpy1(jobnamef,argv[i+1],132);jin++;i++;continue;}
     if(strcmp1(argv[i],"-v")==0 || strcmp1(argv[i],"--version")==0) {
 	printf("\nAESimFM v2.0\n\n");
 	exit(0);
@@ -138,9 +142,10 @@ else{
 	printf("  solver -i <jobname> -o <dir>  Output results to <dir>\n");
 	printf("  solver -v | --version      Show version\n");
 	printf("  solver -h | --help         Show this help\n");
-	printf("  solver --threads N         Set max OpenMP threads (default: logical cores)\n");
+	printf("  solver --threads N         Set max OpenMP threads (1-%d, default: %d)\n",
+               n_logical_cpu, n_logical_cpu);
 	printf("\nEnvironment:\n");
-	printf("  OMP_NUM_THREADS=N           Set number of OpenMP threads (default: logical cores)\n");
+	printf("  OMP_NUM_THREADS=N           Set number of OpenMP threads\n");
 	printf("  CCX_NPROC_EQUATION_SOLVER=N Set SPOOLES solver threads\n");
 	printf("\n");
 	exit(0);
@@ -148,22 +153,40 @@ else{
     if(strcmp1(argv[i],"--threads")==0) {
       if(i+1<argc) {
           int nt=atoi(argv[i+1]);
-          if(nt>0) {
-              char buf[32];
-              sprintf(buf,"%d",nt);
-              setenv("OMP_NUM_THREADS",buf,1);
+          if(nt<1) {printf("ERROR: --threads must be >= 1\n");exit(1);}
+          if(nt>n_logical_cpu) {
+            printf("WARNING: --threads %d exceeds %d logical CPUs; clamping to %d\n",
+                   nt, n_logical_cpu, n_logical_cpu);
+            nt=n_logical_cpu;
           }
+          char buf[32];
+          sprintf(buf,"%d",nt);
+          setenv("OMP_NUM_THREADS",buf,1);
+          i++;
+      } else {
+          printf("ERROR: --threads requires an argument\n");
+          exit(1);
       }
-      i++;
+      continue;
     }
-  }
-  if(jin==0){strcpy(jobnamec,argv[1]);strcpy1(jobnamef,argv[1],132);}
-
-  for(i=1;i<argc;i++){
     if(strcmp1(argv[i],"-o")==0) {
-    strcpy(output,argv[i+1]);break;}
+      if(i+1<argc){strcpy(output,argv[i+1]);i++;}else{printf("ERROR: -o requires a directory\n");exit(1);}
+      continue;
+    }
+    if(argv[i][0]!='-' && jin==0) {
+      strcpy(jobnamec,argv[i]);strcpy1(jobnamef,argv[i],132);jin=1;
+      continue;
+    }
+    printf("ERROR: unknown option: %s\n",argv[i]);
+    printf("Try 'solver --help' for usage.\n");
+    exit(1);
   }
 }
+
+{ char inpcheck[700];strcpy(inpcheck,jobnamec);strcat(inpcheck,".inp");
+  FILE *ftest=fopen(inpcheck,"r");
+  if(!ftest){printf("ERROR: cannot open input file '%s'\n",inpcheck);exit(1);}
+  fclose(ftest); }
 setenv("CCX_JOBNAME_GETJOBNAME",jobnamec,1);
 strcpy(_sig_jobnamec, jobnamec);
 if(!getenv("CCX_NPROC_EQUATION_SOLVER") && !getenv("OMP_NUM_THREADS")) {

@@ -46,7 +46,10 @@ Rules:
 - Relative paths resolve from the process working directory.
 - If an input path option is later added, the solver must still set the job working directory to the input file directory before resolving includes and output paths.
 - All command-line options must be echoed to the log at startup.
-- Unknown options must fail early with a clear error.
+- Unknown options must fail early with a clear error and nonzero exit code.
+- `--threads N` is clamped to the machine's logical CPU count (warning issued if exceeded).
+- `--threads` requires a value; missing value exits with an error.
+- If no input file is found, the solver exits with an error before opening any output files.
 
 ## 3. File Contract
 
