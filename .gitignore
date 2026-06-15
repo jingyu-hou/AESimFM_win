@@ -1,39 +1,24 @@
-# Build output
+# Build outputs
 build/
+build_h5/
+*.exe
+*.a
 *.o
 *.obj
-*.exe
-*.dll
-*.so
+*.mod
 
-# IDE
-.vs/
-.vscode/
-*.user
-*.suo
+# Test outputs (generated)
+test/inputs/*.cvg
+test/inputs/*.dat
+test/inputs/*.frd
+test/inputs/*.sta
+test/inputs/*.h5
+test/inputs/*.png
+test/inputs/spooles.out
 
-# Python
+# IDE and tools
+.agents/
+.claude/
+_add_debug.py
+_debug_edit.py
 __pycache__/
-*.pyc
-*.pyo
-.venv/
-
-# HDF5 output
-*.h5
-*.frd
-
-# Package
-package/
-
-# Test outputs
-test/outputs/
-test_run/
-
-# Temp
-*.tmp
-*.log
-*.swp
-*~
-
-# MSYS2
-.msys2/

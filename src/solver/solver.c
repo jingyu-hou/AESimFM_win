@@ -260,6 +260,7 @@ SFREE(set);SFREE(meminset);SFREE(rmeminset);mt=mi[1]+1;
 NNEW(heading,char,66*nheading_);
 
 h5_init(jobnamec, "AESimFM v2.0", nk_, ne_, nmat_, nstate_);
+h5_write_sdv_metadata(nstate_);
 
 nzs_=20000000;
 
@@ -745,7 +746,7 @@ while(istat>=0) {
        ithermal, co, vold,&icfd,&nmpc_,mi,&nk,&istep,ikboun,&nboun,
        kind1,kind2);
 
-    h5_write_mesh(co, nk, kon, ipkon, lakon, ne,
+    h5_write_mesh(co, nk, kon, ipkon, lakon, ne, nkon,
                   set, nset, istartset, iendset, ialset,
                   matname, nmat, ielmat, mi[0]);
 

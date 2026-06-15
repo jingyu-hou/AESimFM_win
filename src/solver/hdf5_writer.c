@@ -101,8 +101,8 @@ int h5_init(const char *jobnamec, const char *solver_version,
 }
 
 int h5_write_mesh(double *co, ITG nk, ITG *kon, ITG *ipkon, char *lakon, ITG ne,
-                  char *set, ITG nset, ITG *istartset, ITG *iendset, ITG *ialset,
-                  char *matname, ITG nmat, ITG *ielmat, ITG mi0)
+                  ITG nkon, char *set, ITG nset, ITG *istartset, ITG *iendset,
+                  ITG *ialset, char *matname, ITG nmat, ITG *ielmat, ITG mi0)
 {
   hid_t g, dset, ds;
   hsize_t dims[2];
@@ -148,11 +148,12 @@ int h5_write_mesh(double *co, ITG nk, ITG *kon, ITG *ipkon, char *lakon, ITG ne,
     free(eids);
   }
 
-  /* connectivity: find max nodes-per-element, pad */
+  /* connectivity: find max nodes-per-element, pad.
+     ipkon is 1-based (Fortran convention); kon[1..nkon] are active. */
   { ITG max_nc = 4;
     for (i = 0; i < ne; i++) {
       ITG start = ipkon[i];
-      ITG end   = (i + 1 < ne) ? ipkon[i + 1] : start + 27;
+      ITG end   = (i + 1 < ne) ? ipkon[i + 1] : nkon + 1;
       ITG nc    = end - start;
       if (nc > max_nc) max_nc = nc;
     }
@@ -165,7 +166,7 @@ int h5_write_mesh(double *co, ITG nk, ITG *kon, ITG *ipkon, char *lakon, ITG ne,
     { ITG *conn = (ITG*)calloc((size_t)ne * (size_t)max_nc, sizeof(ITG));
       for (i = 0; i < ne; i++) {
         ITG start = ipkon[i];
-        ITG end   = (i + 1 < ne) ? ipkon[i + 1] : start + max_nc;
+        ITG end   = (i + 1 < ne) ? ipkon[i + 1] : nkon + 1;
         ITG nc    = end - start;
         for (j = 0; j < nc && j < max_nc; j++)
           conn[i * max_nc + j] = kon[start + j];
@@ -316,6 +317,131 @@ void h5_close_on_crash(void)
     H5Fclose(h5_file);
     h5_file = -1;
   }
+}
+
+/* ---------- SDV metadata ---------- */
+
+#define SDV_MAX_LABEL 53
+
+typedef struct { const char *name; const char *ns; const char *desc; } sdv_entry_t;
+
+static const sdv_entry_t _sdv_forging[SDV_MAX_LABEL] = {
+  /*  1 */ {"EQPLAS",              "forging/recrystallization", "Equivalent plastic strain"},
+  /*  2 */ {"EPLAS(1)",            "forging/recrystallization", "Plastic strain 11"},
+  /*  3 */ {"EPLAS(2)",            "forging/recrystallization", "Plastic strain 22"},
+  /*  4 */ {"EPLAS(3)",            "forging/recrystallization", "Plastic strain 33"},
+  /*  5 */ {"EPLAS(4)",            "forging/recrystallization", "Plastic strain 12"},
+  /*  6 */ {"EPLAS(5)",            "forging/recrystallization", "Plastic strain 13"},
+  /*  7 */ {"EPLAS(6)",            "forging/recrystallization", "Plastic strain 23"},
+  /*  8 */ {"EQPLASRT",            "forging/recrystallization", "Equivalent plastic strain rate"},
+  /*  9 */ {"SYIELD",              "forging/recrystallization", "Yield stress"},
+  /* 10 */ {"PLASTIC_DISSIPATION", "forging/recrystallization", "Plastic dissipation"},
+  /* 11 */ {"X_DRX",               "forging/recrystallization", "Dynamic recrystallization fraction"},
+  /* 12 */ {"D_DRX",               "forging/recrystallization", "DRX grain size"},
+  /* 13 */ {"D_AVE",               "forging/recrystallization", "Average grain size"},
+  /* 14 */ {"T_AVE",               "forging/recrystallization", "DRX average temperature"},
+  /* 15 */ {"RATE_AVE",            "forging/recrystallization", "DRX average strain rate"},
+  /* 16 */ {"DAMAGE",              "forging/recrystallization", "Damage value"},
+  /* 17 */ {"DAMAGE_INIT_STRAIN",  "forging/recrystallization", "Damage initiation strain"},
+  /* 18 */ {"UNUSED",              "forging/recrystallization", "Reserved/unused"},
+  /* 19 */ {"MEAN_STRESS_BEFORE",  "forging/recrystallization", "Mean stress before averaging"},
+  /* 20 */ {"MEAN_STRESS_AFTER",   "forging/recrystallization", "Mean stress after averaging"},
+  /* 21 */ {"TEMP_CURRENT",        "forging/recrystallization", "Current temperature"},
+  /* 22 */ {"MRX_SIGN",            "forging/recrystallization", "MRX activation flag"},
+  /* 23 */ {"SRX_SIGN",            "forging/recrystallization", "SRX activation flag"},
+  /* 24 */ {"X_MRX",               "forging/recrystallization", "MRX recrystallization fraction"},
+  /* 25 */ {"X_SRX",               "forging/recrystallization", "SRX recrystallization fraction"},
+  /* 26 */ {"D_MRX",               "forging/recrystallization", "MRX grain size"},
+  /* 27 */ {"D_SRX",               "forging/recrystallization", "SRX grain size"},
+  /* 28 */ {"D_MIX",               "forging/recrystallization", "Mixed average grain size"},
+  /* 29 */ {"EQV_RE",              "forging/recrystallization", "Current recovery equivalent plastic strain"},
+  /* 30 */ {"EQV_RE0",             "forging/recrystallization", "Recovery equivalent plastic strain at unload start"},
+  /* 31 */ {"EQUER_MEAN",          "forging/recrystallization", "Mean equivalent strain rate during deformation"},
+  /* 32 */ {"EQV05_DRX",           "forging/recrystallization", "Strain at 50% DRX completion"},
+  /* 33 */ {"T05_MRX",             "forging/recrystallization", "Time to 50% MRX"},
+  /* 34 */ {"T05_SRX",             "forging/recrystallization", "Time to 50% SRX"},
+  /* 35 */ {"T_GROWTH0_MRX",       "forging/recrystallization", "MRX grain growth start time"},
+  /* 36 */ {"D_GROWTH0_MRX",       "forging/recrystallization", "MRX grain growth start size"},
+  /* 37 */ {"T_GROWTH0_SRX",       "forging/recrystallization", "SRX grain growth start time"},
+  /* 38 */ {"D_GROWTH0_SRX",       "forging/recrystallization", "SRX grain growth start size"},
+  /* 39 */ {"UNDEFORM_SIGN",       "forging/recrystallization", "Undeformed state flag"},
+  /* 40 */ {"T_DEFORM",            "forging/recrystallization", "Accumulated deformation time"},
+  /* 41 */ {"D0_K90",              "forging/recrystallization", "K90 initial grain size"},
+  /* 42 */ {"N3_MRX_GG",           "forging/recrystallization", "MRX grain growth completion flag"},
+  /* 43 */ {"N4_SRX_GG",           "forging/recrystallization", "SRX grain growth completion flag"},
+  /* 44 */ {"CREEP_EQ",            "creep_softening",           "Accumulated equivalent creep strain"},
+  /* 45 */ {"CREEP_RATE",          "creep_softening",           "Current equivalent creep strain rate"},
+  /* 46 */ {"CREEP_DINC",          "creep_softening",           "Current increment creep strain"},
+  /* 47 */ {"CREEP_QTILD",         "creep_softening",           "Equivalent stress before creep correction"},
+  /* 48 */ {"CREEP_PRESSURE",      "creep_softening",           "Hydrostatic pressure for creep"},
+  /* 49 */ {"SOFTENING_FACTOR",    "creep_softening",           "Aging softening/relaxation factor"},
+  /* 50 */ {"RELAXED_STRESS_EQ",   "creep_softening",           "Relaxed equivalent stress"},
+  /* 51 */ {"CREEP_ACTIVE_FLAG",   "creep_softening",           "Creep/softening activation flag"},
+  /* 52 */ {"CREEP_TEMP_K",        "creep_softening",           "Creep model temperature"},
+  /* 53 */ {"CREEP_TIME_HOLD",     "creep_softening",           "Accumulated hold/relaxation time"},
+};
+
+int h5_write_sdv_metadata(ITG nstate_)
+{
+  hid_t g, sg, ds, dset;
+  hsize_t dims;
+  ITG i, n;
+  char *buf;
+
+  if (!h5_initialized || h5_file < 0) return 1;
+
+  n = (nstate_ > 0 && nstate_ <= SDV_MAX_LABEL) ? nstate_ : SDV_MAX_LABEL;
+
+  g = H5Gopen2(h5_file, "/state", H5P_DEFAULT);
+  if (g < 0) return 1;
+
+  /* create /state/sdv group */
+  sg = H5Gcreate2(g, "sdv", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+  dims = (hsize_t)n;
+  ds = H5Screate_simple(1, &dims, NULL);
+
+  /* names: fixed-length strings, write as single contiguous buffer */
+  { hid_t atype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(atype, 32);
+    dset = H5Dcreate2(sg, "names", atype, ds, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    buf = (char*)calloc((size_t)n, 32);
+    for (i = 0; i < n; i++) strncpy(buf + (size_t)i * 32, _sdv_forging[i].name, 31);
+    H5Dwrite(dset, atype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    free(buf);
+    H5Dclose(dset);
+    H5Tclose(atype);
+  }
+
+  /* namespaces */
+  { hid_t atype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(atype, 48);
+    dset = H5Dcreate2(sg, "namespaces", atype, ds, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    buf = (char*)calloc((size_t)n, 48);
+    for (i = 0; i < n; i++) strncpy(buf + (size_t)i * 48, _sdv_forging[i].ns, 47);
+    H5Dwrite(dset, atype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    free(buf);
+    H5Dclose(dset);
+    H5Tclose(atype);
+  }
+
+  /* descriptions */
+  { hid_t atype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(atype, 72);
+    dset = H5Dcreate2(sg, "descriptions", atype, ds, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    buf = (char*)calloc((size_t)n, 72);
+    for (i = 0; i < n; i++) strncpy(buf + (size_t)i * 72, _sdv_forging[i].desc, 71);
+    H5Dwrite(dset, atype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    free(buf);
+    H5Dclose(dset);
+    H5Tclose(atype);
+  }
+
+  H5Sclose(ds);
+  H5Gclose(sg);
+  H5Gclose(g);
+
+  return 0;
 }
 
 #endif /* OUTPUT_HDF5 */
