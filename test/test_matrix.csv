@@ -1,0 +1,27 @@
+Category,Subcategory,Test Name,INP File,Expected Behavior,FRD Expected,SDV Namespace,Phase,Status
+Element,CAX,CAX3 single element,unit_cax3.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,CAX,CAX4R single element,unit_cax4r.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,CAX,CAX6 single element,unit_cax6.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,CAX,CAX8 single element,unit_cax8.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,CAX,CAX8R single element,unit_cax8r.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,C3D,C3D4 single element,unit_c3d4.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,C3D,C3D6 single element,unit_c3d6.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,C3D,C3D8 single element,unit_c3d8.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,C3D,C3D8R single element,unit_c3d8r.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,C3D,C3D10 single element,unit_c3d10.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,C3D,C3D15 single element,unit_c3d15.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,C3D,C3D20 single element,unit_c3d20.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Element,C3D,C3D20R single element,unit_c3d20r.inp,Linear elastic static,Valid FRD with 9999,N/A,2,pass
+Keyword,Creep,Norton creep softening,creep_single_element_norton.inp,*CREEP-SOFTENING TYPE=NORTON,Valid FRD with 9999,creep_softening,2,pass
+Keyword,Creep,User creep softening,creep_single_element_user.inp,*CREEP-SOFTENING TYPE=USER,Valid FRD with 9999,creep_softening,2,pass
+Keyword,Creep,Stress relaxation + creep,stress_relaxation_hold.inp,2-step stress relaxation + *CREEP-SOFTENING,Valid FRD with 9999,creep_softening,2,pass
+Keyword,Powder,Powder + creep coupled,powder_creep_minimal.inp,*METAL POWDER + *CREEP-SOFTENING coupled,Valid FRD with 9999,porous_forming_densification,2,pass
+Keyword,DRX,SRX recrystallization,srx_minimal.inp,*RATE-DEPENDENTPLASTIC + *DYNAMICRECRYSTALLIZATION,Valid FRD with 9999,forging_recrystallization,2,pass
+Keyword,DRX,MRX recrystallization,mrx_minimal.inp,*RATE-DEPENDENTPLASTIC + *DYNAMICRECRYSTALLIZATION,Valid FRD with 9999,forging_recrystallization,2,pass
+Keyword,Phase,TTT phase transformation,phase_ttt_minimal.inp,*PHASECURVE(type=TTT) + *PHASEEQUILIBRIUM + *PHASECTROL,Valid FRD with 9999,heat_treatment_phase,2,pass
+SDV,forging,SDV namespace: forging/recrystallization,srx_minimal.dat,SDV 1-30+ DRX grain/volume fraction,SDV labels in forging context,forging_recrystallization,2,pass
+SDV,heat_treatment,SDV namespace: heat treatment,phase_ttt_minimal.dat,SDV 1-5 phase fractions (0-1 range),SDV labels in phase context,heat_treatment_phase,2,pass
+SDV,porous,SDV namespace: porous forming,powder_creep_minimal.dat,SDV 1-53 density + creep state,SDV labels in porous forming context,porous_forming_densification,2,pass
+SDV,creep,SDV namespace: creep softening,creep_single_element_norton.dat,SDV 1-53 creep state variables,SDV labels in creep softening context,creep_softening,2,pass
+FRD,integrity,FRD terminator present,unit_c3d8.frd,FRD ends with 9999 record,9999 terminator confirmed,N/A,2,pass
+FRD,adjacent_sci,FRD adjacent scientific notation,phase_ttt_minimal.frd,FRD numeric records parse correctly with adjacent E-format values,Values extracted without NaN/Inf,N/A,2,pass

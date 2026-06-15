@@ -1,0 +1,94 @@
+*HEADING
+Minimal TTT phase transformation test: single C3D8 element cooling 900->600 C
+*NODE
+1, 0.0, 0.0, 0.0
+2, 1.0, 0.0, 0.0
+3, 1.0, 1.0, 0.0
+4, 0.0, 1.0, 0.0
+5, 0.0, 0.0, 1.0
+6, 1.0, 0.0, 1.0
+7, 1.0, 1.0, 1.0
+8, 0.0, 1.0, 1.0
+*ELEMENT, TYPE=C3D8, ELSET=EALL
+1, 1, 2, 3, 4, 5, 6, 7, 8
+*NSET, NSET=NALL
+1,2,3,4,5,6,7,8
+*NSET, NSET=NTOP
+5,6,7,8
+*NSET, NSET=NBOT
+1,2,3,4
+*SOLID SECTION, ELSET=EALL, MATERIAL=STEEL
+**
+*MATERIAL, NAME=STEEL
+*DENSITY
+7800., 600
+7700., 900
+*ELASTIC
+200e9,0.3, 600
+190e9,0.31, 900
+*EXPANSION
+1.5E-05, 600
+1.7E-05, 900
+*CONDUCTIVITY
+25., 600
+26., 900
+*SPECIFIC HEAT
+560., 600
+660., 900
+**
+** TTT phase transformation data: austenite (phase 1) -> product (phase 2)
+** PHASECURVE: phase_from, variant, num_points, fraction, grain_size
+** Phase 1 placeholders (austenite parent — 0 data points each)
+** Phase 2 real curve with time-temperature data
+*PHASECURVE,type=TTT
+1,1,0,0,1.0
+1,2,0,0,1.0
+2,1,10,0.005,0
+1.0,850
+5.0,800
+20.0,750
+80.0,700
+300.0,680
+60.0,720
+10.0,770
+5.0,810
+3.0,830
+2.0,840
+2,2,0,0,1.0
+**
+** Equilibrium phase fractions vs temperature for phase 2
+** Line format: phase, num_temps
+*PHASEEQUILIBRIUM
+2,6
+500.,0.0
+600.,0.05
+700.,0.15
+750.,0.30
+800.,0.60
+850.,1.0
+**
+** Phase control parameters
+*PHASECTROL
+1,0,0,0,0
+**
+*INITIAL CONDITIONS,TYPE=TEMPERATURE
+NALL, 900.
+**
+*STEP, INC=20
+TTT cooling: 900C -> 600C over 10s
+*STATIC
+0.5, 10., 1.E-8, 10.
+*TEMPERATURE
+NALL, 600.
+*BOUNDARY
+NBOT, 3,3, 0.0
+1,1,2, 0.0
+*NODE PRINT, NSET=NALL
+U, NT
+*NODE FILE
+U, NT
+*EL FILE
+S
+*EL PRINT, ELSET=EALL
+S, SDV
+*END STEP

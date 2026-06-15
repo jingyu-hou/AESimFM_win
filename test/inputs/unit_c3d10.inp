@@ -1,0 +1,37 @@
+*HEADING
+C3D10 single element test - 10-node quadratic tetrahedral
+*NODE
+1,  0.0, 0.0, 0.0
+2,  1.0, 0.0, 0.0
+3,  0.5, 1.0, 0.0
+4,  0.5, 0.3, 1.0
+5,  0.5, 0.0, 0.0
+6,  0.75,0.5, 0.0
+7,  0.25,0.5, 0.0
+8,  0.25,0.15,0.5
+9,  0.75,0.15,0.5
+10, 0.5, 0.65,0.5
+*ELEMENT, TYPE=C3D10, ELSET=EALL
+1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+*SOLID SECTION, ELSET=EALL, MATERIAL=STEEL
+*MATERIAL, NAME=STEEL
+*ELASTIC
+210000.0, 0.3
+*STEP
+*STATIC
+*BOUNDARY
+1, 1,3, 0.0
+2, 1,3, 0.0
+3, 1,3, 0.0
+5, 1,3, 0.0
+6, 1,3, 0.0
+7, 1,3, 0.0
+*CLOAD
+4, 3, -100.0
+*NODE PRINT, NSET=NSETALL
+U
+*NODE PRINT, NSET=NSETALL
+RF
+*NSET, NSET=NSETALL
+1,2,3,4,5,6,7,8,9,10
+*END STEP
