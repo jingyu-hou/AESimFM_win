@@ -90,8 +90,17 @@ Key documents:
 | `docs\process_chain_guide.md` | 多工艺连续仿真和状态转移 |
 | `docs\windows_solver_capability_baseline.md` | WSL parity 能力基线 |
 | `docs\windows_remesh_architecture.md` | 自动重网格架构 |
-| `AutoRemesh_Design.md` | 源项目自动重网格设计参考 |
-| `ExistingRemesh_Summary.md` | 源项目手动重网格行为参考 |
+| `docs\AutoRemesh_Design.md` | 源项目自动重网格设计参考 |
+| `docs\ExistingRemesh_Summary.md` | 源项目手动重网格行为参考 |
+
+Additional current document index:
+
+| Document | Role |
+|---|---|
+| `docs\windows_solver_completion_gap_plan.md` | Current gaps, confirmed requirements, and staged delivery plan |
+| `docs\project_structure.md` | Repository layout and Skill/project-document boundary |
+| `docs\WORKDOC_MIGRATION.md` | Migrated work-document source and status index |
+| `docs\skill_migrated_references\` | Historical project references moved out of the Skill directory |
 
 ## 5. CLI Contract
 

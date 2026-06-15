@@ -14,19 +14,31 @@ for every planning or environment lookup step.
 | Local file | Source file | Purpose |
 | --- | --- | --- |
 | `AGENTS.md` | `D:\AESimFM\AGENTS.md` | Shared project rules and recent AI failure checklist. |
-| `all_core_plan.md` | `D:\AESimFM\all_core_plan.md` | Linux all/core package structure and boundary reference. |
-| `ai_environment_lookup_guide.md` | `D:\AESimFM\ai_environment_lookup_guide.md` | Machine and WSL environment lookup reference. |
-| `AutoRemesh_Design.md` | `D:\AESimFM\AutoRemesh_Design.md` | Automatic remeshing design reference. |
-| `ExistingRemesh_Summary.md` | `D:\AESimFM\ExistingRemesh_Summary.md` | Existing remeshing workflow summary. |
+| `docs\all_core_plan.md` | `D:\AESimFM\all_core_plan.md` | Historical Linux all/core background only. In that context, all=whole source package and core=core source package; it is not a Windows acceptance constraint. |
+| `docs\ai_environment_lookup_guide.md` | `D:\AESimFM\ai_environment_lookup_guide.md` | Machine and WSL environment lookup reference. |
+| `docs\AutoRemesh_Design.md` | `D:\AESimFM\AutoRemesh_Design.md` | Automatic remeshing design reference. |
+| `docs\ExistingRemesh_Summary.md` | `D:\AESimFM\ExistingRemesh_Summary.md` | Existing remeshing workflow summary. |
 
-SHA256 hashes were verified after migration for all five mirrored files.
+SHA256 hashes were verified after the initial migration. Path-only moves into
+`docs\` were later made to keep project documents out of the Skill directory.
 
 The following Windows/AESimFM maintenance references were also migrated from
-`D:\AESimFM\.claude\skills\aesimfm-simulation-maintenance\references` into
-`D:\AESimFM_win\.agents\skills\aesimfm-windows-dev\references`:
+`D:\AESimFM\.claude\skills\aesimfm-simulation-maintenance\references`.
+
+Project documents now live under `docs\skill_migrated_references\` unless a
+standardized current version exists directly under `docs\`:
 
 - `aesimfm-win-handoff.md`
 - `architecture.md`
+- `windows-process-chain-state-transfer.md`
+- `windows-remesh-architecture.md`
+- `windows-solver-capability-baseline.md`
+- `windows-solver-interface-contract.md`
+- `windows-solver-performance-plan.md`
+
+Skill-only operating references remain under
+`.agents\skills\aesimfm-windows-dev\references\`:
+
 - `bug-troubleshooting.md`
 - `development-sop.md`
 - `execution-rules.md`
@@ -35,11 +47,7 @@ The following Windows/AESimFM maintenance references were also migrated from
 - `prompt-templates.md`
 - `remesh-integration-sop.md`
 - `solver-debug-sop.md`
-- `windows-process-chain-state-transfer.md`
-- `windows-remesh-architecture.md`
-- `windows-solver-capability-baseline.md`
-- `windows-solver-interface-contract.md`
-- `windows-solver-performance-plan.md`
+- `windows-build-sop.md`
 
 ## Already Local
 
@@ -47,6 +55,7 @@ The following Windows/AESimFM maintenance references were also migrated from
 | --- | --- |
 | `docs\architecture.md` | Master architecture document for the Windows solver workspace. |
 | `.agents\skills\aesimfm-windows-dev\references\windows-build-sop.md` | Windows build SOP bundled with the skill. |
+| `docs\project_structure.md` | Repository layout and Skill/project-document boundary. |
 
 ## Standardized Local Docs
 
@@ -72,5 +81,6 @@ migration:
 - `.agents\skills\aesimfm-windows-dev\references\solver-debug-sop.md` exists.
 - `.agents\skills\aesimfm-windows-dev\references\inp-keyword-checklist.md` exists.
 - `.agents\skills\aesimfm-windows-dev\references\remesh-integration-sop.md` exists.
+- Project-only references were moved out of the Skill directory into `docs\skill_migrated_references\`.
 
 No skill-referenced document path is currently known to be missing.

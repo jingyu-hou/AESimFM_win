@@ -12,13 +12,40 @@ For any new AI or developer session, read these in order:
 1. `AGENTS.md`
 2. `docs\architecture.md`
 3. `docs\windows_solver_completion_gap_plan.md`
-4. Task-specific docs:
+4. `docs\project_structure.md`
+5. Task-specific docs:
    - INP keywords and SDV rules: `docs\inp_keywords_reference.md`
    - CLI contract: `docs\solver_api.md`
    - HDF5/checkpoint format: `docs\h5_format_spec.md`
    - Process chain: `docs\process_chain_guide.md`
    - Remesh architecture: `docs\windows_remesh_architecture.md`
    - Capability baseline: `docs\windows_solver_capability_baseline.md`
+   - Historical Linux all/core background only: `docs\all_core_plan.md`
+   - Migrated workdoc index: `docs\WORKDOC_MIGRATION.md`
+   - Historical migrated Skill references: `docs\skill_migrated_references\`
+
+## Repository Layout
+
+The project should keep source, project documentation, and AI operating
+instructions separate:
+
+- Product code: `src\solver`, `src\io`, `src\remesh`
+- Project documents: `docs`
+- Codex skill: `.agents\skills\aesimfm-windows-dev`
+
+Do not put project architecture or interface contracts only under the Skill.
+The Skill should contain reusable AI work procedures, SOPs, prompt templates,
+and checklists.
+
+`docs\all_core_plan.md` is retained only to explain the old Linux/all-core source
+history. In that old context, `all` means the whole software source package and
+`core` means the core source package. The current Windows side is focused on
+solver development and is therefore mostly core solver code. This historical
+document does not constrain Windows solver architecture, packaging, feature
+scope, or self-code-ratio targets. The Windows side does not currently use
+self-code ratio as an acceptance criterion; the priority is to implement working,
+usable solver functionality first. Self-code ratio can be revisited later if the
+Windows product direction develops normally and that metric becomes relevant.
 
 ## Current Development Direction
 

@@ -66,16 +66,26 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
-## 5. Project Rules for AES all/core
+## 5. AESimFM Background And Windows Solver Rules
 
-These rules are mandatory when working under `D:\AESimFM\code\test`, `D:\AESgui_for_linux`, or `D:\ccx`.
+When working under `D:\AESimFM_win`, treat this repository as the Windows-native
+solver project. The Linux `all/core` documents are background references only:
+they explain source history, component boundaries, and prior GUI/Linux packaging
+decisions. In that old context, `all` means the whole software source package
+and `core` means the core source package. The Windows side is currently focused
+on solver development and is therefore mostly core solver code. The Linux
+`all/core` documents do not constrain Windows-side scope, directory layout,
+packaging, or self-code-ratio targets. Windows work should first optimize for
+implemented functionality and usability; self-code ratio is only a possible
+later-stage concern if the Windows product direction develops normally.
 
 Read order before coding:
 
 1. Read this file first.
-2. Read `D:\AESimFM\all_core_plan.md` for the current all/core route, package structure, component boundaries, and acceptance criteria.
-3. Read `D:\AESimFM\ai_environment_lookup_guide.md` before diagnosing missing Qt, qmake, gcc, gfortran, make, WSL, local libraries, or runtime dependencies.
-4. If multiple agents are working, read `D:\AESimFM\claude_all_core_agents_workflow.md` and stay inside your role.
+2. Read `D:\AESimFM_win\README.md`, `D:\AESimFM_win\docs\architecture.md`, and `D:\AESimFM_win\docs\windows_solver_completion_gap_plan.md` for current Windows solver direction.
+3. Read `D:\AESimFM_win\docs\all_core_plan.md` only when you need Linux source-code background or all/core history.
+4. Read `D:\AESimFM_win\docs\ai_environment_lookup_guide.md` before diagnosing missing Qt, qmake, gcc, gfortran, make, WSL, local libraries, or runtime dependencies.
+5. If multiple agents are working in this Windows repository, read `D:\AESimFM_win\.agents\skills\aesimfm-windows-dev\references\windows-agent-workflow.md` and stay inside your role.
 
 Environment rule:
 
@@ -88,7 +98,7 @@ Code ownership rule:
 
 - Do not overwrite work from another agent without first comparing the file and understanding why it changed.
 - Do not make broad formatting conversions or full-directory replacements unless the plan explicitly requires them.
-- If restoring files from the original delivery tree, re-apply required all/core changes afterwards: component paths, key handling, solver path, build scripts, and runtime library paths.
+- If working in the old Linux all/core workspace and restoring files from the original delivery tree, re-apply required all/core changes afterwards: component paths, key handling, solver path, build scripts, and runtime library paths.
 
 GUI quality rule:
 
@@ -110,13 +120,13 @@ Regression protection rule:
 - Before editing, identify the currently working functions that could be affected.
 - After editing, verify both the new fix and the affected existing functions.
 - If a temporary change is needed for diagnosis, remove it before final packaging or clearly record why it remains.
-- A change is not complete if it solves the new issue but introduces startup dialogs, mojibake, broken build, broken GUI-to-solver invocation, missing components, or reduced all/core package integrity.
+- A Windows solver change is not complete if it solves the new issue but introduces a broken build, broken CLI invocation, missing runtime components, parser regressions, or incorrect solver outputs. Old all/core package-integrity rules apply only when explicitly working in that Linux/all-core workspace.
 
 ## 6. Recent AI Failure Checklist
 
 Avoid repeating these recent mistakes:
 
-- Do not keep coding after drifting from `all_core_plan.md`; reread the plan and correct course.
+- Do not apply `all_core_plan.md` as a Windows acceptance plan. Use it only for Linux/all-core background unless the task explicitly targets that old workspace.
 - Do not claim compile success from object/executable existence alone; run the declared build command.
 - Do not stop at CLI solver success; verify GUI startup, readable Chinese text, and GUI-to-solver invocation.
 - Do not introduce or preserve mojibake. Source text containing `����` or `锟斤拷` is a defect.

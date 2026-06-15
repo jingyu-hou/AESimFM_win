@@ -1,0 +1,34 @@
+*Heading
+Minimal CAX4 linear elastic test -- 1 element, static step
+*Node
+1, 0.0, 0.0
+2, 1.0, 0.0
+3, 1.0, 1.0
+4, 0.0, 1.0
+*Element, type=CAX4
+1, 1, 2, 3, 4
+*Nset, nset=ALLNODE, generate
+1,4
+*Elset, elset=ALLELEM, generate
+1,1
+*Solid Section, elset=ALLELEM, material=STEEL
+*Material, name=STEEL
+*Elastic
+210e9, 0.3
+*Density
+7800
+*Boundary
+1, 1, 2
+2, 1
+*Step, inc=100
+*Static
+0.1, 1.0
+*Boundary
+3, 2, 2, -0.01
+4, 2, 2, -0.01
+*Node File
+U
+*El File
+S, E
+*End Step
+** end of input

@@ -30,10 +30,10 @@ set(CMAKE_Fortran_STANDARD 2008)
 # K&R C tolerance for legacy CalculiX C code
 # -include pthread.h: needed because WeICME.h declares pthread_* without including pthread.h
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-int-conversion -Wno-implicit-int -Wno-incompatible-pointer-types -Wno-implicit-function-declaration -Wno-return-mismatch")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -include pthread.h")
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch -g -fbacktrace")
-set(CMAKE_C_FLAGS_DEBUG "-g -O0")
-set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -fcheck=all -fbacktrace")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -include pthread.h -fstack-protector-all")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch -g -fbacktrace -fstack-protector-all")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fstack-protector-all")
+set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -fcheck=all -fbacktrace -fstack-protector-all")
 
 if(ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
