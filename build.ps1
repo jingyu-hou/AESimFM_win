@@ -35,6 +35,7 @@ Examples:
 $BASH = "D:\msys64\usr\bin\bash.exe"
 $WIN_ROOT = "/d/AESimFM_win"
 $BUILD_TYPE = if ($Debug) { "Debug" } else { "Release" }
+$env:MSYSTEM = "UCRT64"
 
 Write-Host "========================================"
 Write-Host " AESimFM v2.0 Build"

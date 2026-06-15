@@ -43,12 +43,26 @@ set(AESIM_SOLVER_EXT_F
 )
 
 # C override sources (matching SCCXC from Makefile.inc + Windows compat)
+# NOTE: frd.c and hdf5_writer.c are linked directly (not via static lib)
+# to ensure they override symbols in calculix_base.a
 set(AESIM_SOLVER_EXT_C
-  frd.c readxstateini.c getSystemCPUs.c stof.c stoi.c
+  readxstateini.c getSystemCPUs.c stof.c stoi.c
   strcmp2.c strcpy1.c v_betrag.c v_prod.c v_result.c
   plasticwork.c drxc.c output_mtx.c itinerate_print.c random_print.c
   win_compat.c
 )
+
+# HDF5 writer sources (conditional)
+if(OUTPUT_HDF5)
+  set(HDF5_WRITER_SRC hdf5_writer.c)
+  set(HDF5_ROOT "D:/msys64/ucrt64")
+  set(HDF5_INCLUDE_DIR "${HDF5_ROOT}/include")
+  set(HDF5_LIBRARY "${HDF5_ROOT}/lib/libhdf5.dll.a")
+else()
+  set(HDF5_WRITER_SRC "")
+  set(HDF5_INCLUDE_DIR "")
+  set(HDF5_LIBRARY "")
+endif()
 
 # Extra Fortran sources not in override list but needed for linking
 set(AESIM_SOLVER_EXT_F_EXTRA
@@ -56,10 +70,11 @@ set(AESIM_SOLVER_EXT_F_EXTRA
 )
 
 # Build AESimFM solver extension static library (override layer)
-add_library(aesim_solver_ext STATIC ${AESIM_SOLVER_EXT_F} ${AESIM_SOLVER_EXT_F_EXTRA} ${AESIM_SOLVER_EXT_C})
+add_library(aesim_solver_ext STATIC ${AESIM_SOLVER_EXT_F} ${AESIM_SOLVER_EXT_F_EXTRA} ${AESIM_SOLVER_EXT_C} ${HDF5_WRITER_SRC})
 target_include_directories(aesim_solver_ext PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${EXTERNAL_HEADERS}
+  ${HDF5_INCLUDE_DIR}
 )
 target_link_libraries(aesim_solver_ext PRIVATE OpenMP::OpenMP_C OpenMP::OpenMP_Fortran)
 set_target_properties(aesim_solver_ext PROPERTIES
@@ -69,7 +84,8 @@ set_target_properties(aesim_solver_ext PROPERTIES
 # ============================================
 # Main Solver Executable
 # ============================================
-add_executable(solver solver.c)
+# frd.c linked directly (not via static lib) to override frd() in calculix_base.a
+add_executable(solver solver.c frd.c)
 target_include_directories(solver PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${EXTERNAL_HEADERS}
@@ -91,6 +107,7 @@ target_link_libraries(solver PRIVATE
   OpenMP::OpenMP_Fortran
   ${CMAKE_THREAD_LIBS_INIT}
   m
+  ${HDF5_LIBRARY}
 )
 
 set_target_properties(solver PROPERTIES OUTPUT_NAME solver)

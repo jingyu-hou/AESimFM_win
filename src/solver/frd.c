@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "WeICME.h"
+#include "hdf5_writer.h"
 
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
@@ -41,6 +42,9 @@ void frd(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne0,
           iselect=0  means both of the above */
 
   FILE *f1;
+
+  frd_h5_write_state(co, nk, v, stn, t1, xstaten, nstate_, istep, iinc,
+                     time, ithermal, mi);
 
   char c[2]="C",m1[4]=" -1",m2[4]=" -2",m3[4]=" -3",
     p0[6]="    0",p1[6]="    1",p2[6]="    2",p3[6]="    3",p4[6]="    4",
@@ -2258,6 +2262,7 @@ void frd(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne0,
   }
 
   fclose(f1);
+
   return;
 
 }

@@ -21,6 +21,7 @@
 #include <time.h>
 #include <signal.h>
 #include <windows.h>
+#include "hdf5_writer.h"
 
 static char _sig_jobnamec[660] = "";
 static void sig_handler(int sig) {
@@ -36,6 +37,7 @@ static void sig_handler(int sig) {
   }
   fprintf(stderr, "\nSolver crash: signal %d (FRD footer written)\n", sig);
   fflush(stderr);
+  h5_close_on_crash();
   _exit(1);
 }
 
@@ -256,6 +258,8 @@ FORTRAN(allocation,(&nload_,&nforc_,&nboun_,&nk_,&ne_,&nmpc_,&nset_,&nalset_,
 
 SFREE(set);SFREE(meminset);SFREE(rmeminset);mt=mi[1]+1;
 NNEW(heading,char,66*nheading_);
+
+h5_init(jobnamec, "AESimFM v2.0", nk_, ne_, nmat_, nstate_);
 
 nzs_=20000000;
 
@@ -740,6 +744,10 @@ while(istat>=0) {
        &ipompc, &labmpc, &ikmpc, &ilmpc,&fmpc, &nodempc, &coefmpc,
        ithermal, co, vold,&icfd,&nmpc_,mi,&nk,&istep,ikboun,&nboun,
        kind1,kind2);
+
+    h5_write_mesh(co, nk, kon, ipkon, lakon, ne,
+                  set, nset, istartset, iendset, ialset,
+                  matname, nmat, ielmat, mi[0]);
 
     /* reallocating space in the first step */
 
@@ -1738,6 +1746,8 @@ if((f1=fopen(fneig,"ab"))==NULL){
 }
 fprintf(f1," 9999\n");
 fclose(f1);
+
+h5_close();
 
 /* deallocating the fields
    this section is addressed immediately after leaving calinput */

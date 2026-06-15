@@ -53,6 +53,9 @@ endif()
 if(ENABLE_AUTO_REMESH)
   add_compile_definitions(AUTO_REMESH)
 endif()
+if(OUTPUT_HDF5)
+  add_compile_definitions(OUTPUT_HDF5)
+endif()
 
 # ============================================
 # Numerical Libraries (imported)
